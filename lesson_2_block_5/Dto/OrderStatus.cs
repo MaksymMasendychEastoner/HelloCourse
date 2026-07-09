@@ -4,7 +4,10 @@ using System.Text;
 
 namespace lesson_2_block_5.Dto
 {
-    internal class OrderStatus
+    public enum OrderStatus
     {
+        Pending,
+        Shipped,
+        Cancelled
     }
 }
