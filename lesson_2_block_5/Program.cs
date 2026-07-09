@@ -1,6 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using lesson_2_block_5.Mappers;
 using lesson_2_block_5.Models;
+using System;
+using System.Collections.Generic;
 
 Console.WriteLine("--- Internet Shop Data Init ---");
 
@@ -27,3 +28,9 @@ var rawOrders = new List<RawOrder>
 };
 
 Console.WriteLine($"Loaded {rawProducts.Count} raw products and {rawOrders.Count} raw orders.");
+
+
+var products = ProductMapper.ToDtoList(rawProducts);
+var orders = OrderMapper.ToDtoList(rawOrders);
+
+Console.WriteLine($"Mapped {products.Count} products and {orders.Count} orders to DTO.");
