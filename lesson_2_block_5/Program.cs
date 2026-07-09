@@ -1,6 +1,7 @@
 ﻿using lesson_2_block_5.Dto;
 using lesson_2_block_5.Mappers;
 using lesson_2_block_5.Models;
+using lesson_2_block_5.Strategies;
 using System;
 using System.Collections.Generic;
 
@@ -128,3 +129,21 @@ var loyalCustomers = orders
     .ToList();
 Console.WriteLine("\nCustomers who NEVER cancelled an order:");
 foreach (var name in loyalCustomers) Console.WriteLine($" - {name}");
+
+
+Console.WriteLine("--- TASK 2: POLYMORPHISM TESTING ---");
+
+var testProduct = products.First();
+
+// Створюємо список різних стратегій знижок
+var discountStrategies = new List<IDiscountStrategy>
+{
+    new NoDiscount(),
+    new PercentageDiscount(15),     // 15% знижки
+    new FixedAmountDiscount(50)     // $50 знижки
+};
+
+foreach (var strategy in discountStrategies)
+{
+    PriceCalculator.PrintReceipt(testProduct, strategy);
+}
