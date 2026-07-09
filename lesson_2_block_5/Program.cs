@@ -1,6 +1,8 @@
 ﻿using lesson_2_block_5.Dto;
 using lesson_2_block_5.Mappers;
 using lesson_2_block_5.Models;
+using lesson_2_block_5.Orders;
+using lesson_2_block_5.Shipping;
 using lesson_2_block_5.Strategies;
 using System;
 using System.Collections.Generic;
@@ -146,4 +148,68 @@ var discountStrategies = new List<IDiscountStrategy>
 foreach (var strategy in discountStrategies)
 {
     PriceCalculator.PrintReceipt(testProduct, strategy);
+}
+
+// --- БЛОК 6. ЗАДАЧА 2: ТЕСТУВАННЯ ПОЛІМОРФІЗМУ ЗНИЖОК ---
+Console.WriteLine("\n--- DISCOUNT POLYMORPHISM TESTING ---");
+testProduct = products.First();
+discountStrategies = new List<IDiscountStrategy>
+{
+    new NoDiscount(),
+    new PercentageDiscount(15),
+    new FixedAmountDiscount(50)
+};
+
+foreach (var strategy in discountStrategies)
+{
+    PriceCalculator.PrintReceipt(testProduct, strategy);
+}
+
+// --- БЛОК 6. ЗАДАЧА 4: КОМБІНУВАННЯ ІНТЕРФЕЙСІВ ТА LINQ ---
+Console.WriteLine("\n--- COMBINED ORDERS ANALYSIS (LINQ) ---");
+
+var laptop = products.First(p => p.Id == 1);
+var phone = products.First(p => p.Id == 2);
+var tShirt = products.First(p => p.Id == 4);
+var lamp = products.First(p => p.Id == 8);
+
+// Метод-помічник для вибору доставки. За умовою ТЗ перевірка суми >= $100 робиться ззовні класу
+IShippingMethod GetShippingMethod(decimal finalPrice, bool preferExpress)
+{
+    if (finalPrice >= 100m && !preferExpress) return new FreeShipping();
+    return preferExpress ? new ExpressShipping() : new StandardShipping();
+}
+
+decimal price1 = new PercentageDiscount(10).ApplyDiscount(laptop.Price);
+decimal price2 = new NoDiscount().ApplyDiscount(tShirt.Price);
+decimal price3 = new FixedAmountDiscount(10).ApplyDiscount(phone.Price);
+decimal price4 = new PercentageDiscount(20).ApplyDiscount(lamp.Price);
+
+// Створюємо список замовлень з різними комбінаціями
+var combinedOrders = new List<Order>
+{
+    new() { Product = laptop, Discount = new PercentageDiscount(10), Shipping = GetShippingMethod(price1, false) },
+    new() { Product = tShirt, Discount = new NoDiscount(), Shipping = GetShippingMethod(price2, false) },
+    new() { Product = phone, Discount = new FixedAmountDiscount(10), Shipping = GetShippingMethod(price3, true) },
+    new() { Product = lamp, Discount = new PercentageDiscount(20), Shipping = GetShippingMethod(price4, false) },
+    new() { Product = laptop, Discount = new FixedAmountDiscount(100), Shipping = GetShippingMethod(laptop.Price - 100, true) }
+};
+
+// LINQ-запит: знаходимо замовлення з найбільшим GetTotal()
+var mostExpensiveOrder = combinedOrders.MaxBy(o => o.GetTotal());
+
+Console.WriteLine("All combined orders:");
+foreach (var o in combinedOrders)
+{
+    Console.WriteLine($" - Item: {o.Product.Name} | Discount: {o.Discount.Description} | Shipping: {o.Shipping.Name} | Total: ${o.GetTotal():F2}");
+}
+
+if (mostExpensiveOrder != null)
+{
+    Console.WriteLine("\n==================================================");
+    Console.WriteLine("MOST EXPENSIVE ORDER:");
+    Console.WriteLine($" - Product: {mostExpensiveOrder.Product.Name}");
+    Console.WriteLine($" - Shipping Method: {mostExpensiveOrder.Shipping.Name}");
+    Console.WriteLine($" - Final Total: ${mostExpensiveOrder.GetTotal():F2}");
+    Console.WriteLine("==================================================");
 }
