@@ -32,4 +32,15 @@ namespace lesson_2_block_7_solid_soi.Models
             GuestsCount = guestsCount;
         }
     }
+
+    public record SuiteBookingRequest : BookingRequest
+    {
+        public bool HasButlerService { get; }
+
+        public SuiteBookingRequest(Guid roomId, DateOnly checkIn, DateOnly checkOut, int guestsCount, bool hasButlerService)
+            : base(roomId, checkIn, checkOut, guestsCount)
+        {
+            HasButlerService = hasButlerService;
+        }
+    }
 }
